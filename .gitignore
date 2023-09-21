@@ -4,5 +4,8 @@ src/db.sqlite3
 
 src/config/__pycache__
 
+src/products/__pycache__
+src/products/migrations
+
 src/api/__pycache__
 src/api/migrations
