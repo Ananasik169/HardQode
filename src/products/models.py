@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -33,6 +34,11 @@ class Lesson(models.Model):
 class LessonProgress(models.Model):
     '''Модель прогресса прохождения урока.'''
 
+    def viewed_time_validator(self, viewed_time):
+        '''Проверяет, что просмотренное время меньше длины видео.'''
+        if viewed_time > self.lesson.duration:
+            raise ValidationError
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -44,6 +50,7 @@ class LessonProgress(models.Model):
         verbose_name='Урок'
     )
     viewed_time = models.DurationField(
+        validators=[viewed_time_validator],
         default=None,
         verbose_name='Просмотренное время'
     )
@@ -72,7 +79,7 @@ class LessonProgress(models.Model):
 
 
 class Product(models.Model):
-    '''Класс продукта.'''
+    '''Модель продукта.'''
 
     owner = models.ForeignKey(
         User,
@@ -82,6 +89,7 @@ class Product(models.Model):
     lessons = models.ManyToManyField(
         'Lesson',
         related_name='products',
+        related_query_name="product_set",
         verbose_name='Уроки'
     )
 
@@ -101,12 +109,14 @@ class ProductAccess(models.Model):
     product = models.ForeignKey(
         'Product',
         on_delete=models.CASCADE,
-        verbose_name='Продукт'
+        verbose_name='Продукт',
+        related_name="access"
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        verbose_name='Пользователь',
+        related_name="access"
     )
 
     def __str__(self) -> str:
