@@ -1,17 +1,7 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-
-class User(models.Model):
-    '''Модель пользователя.'''
-
-    def __str__(self) -> str:
-        '''Возвращает id пользователя.'''
-        return str(self.id)
-
-    class Meta:
-        '''Метаданные.'''
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+User = get_user_model()
 
 
 class Lesson(models.Model):
@@ -44,7 +34,7 @@ class LessonProgress(models.Model):
     '''Модель прогресса прохождения урока.'''
 
     user = models.ForeignKey(
-        'User',
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
@@ -56,6 +46,10 @@ class LessonProgress(models.Model):
     viewed_time = models.DurationField(
         default=None,
         verbose_name='Просмотренное время'
+    )
+    last_view = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Последний просмотр'
     )
 
     @property
@@ -81,7 +75,7 @@ class Product(models.Model):
     '''Класс продукта.'''
 
     owner = models.ForeignKey(
-        'User',
+        User,
         on_delete=models.CASCADE,
         verbose_name='Владелец'
     )
@@ -110,7 +104,7 @@ class ProductAccess(models.Model):
         verbose_name='Продукт'
     )
     user = models.ForeignKey(
-        'User',
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
