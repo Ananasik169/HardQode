@@ -34,11 +34,6 @@ class Lesson(models.Model):
 class LessonProgress(models.Model):
     '''Модель прогресса прохождения урока.'''
 
-    def viewed_time_validator(self, viewed_time):
-        '''Проверяет, что просмотренное время меньше длины видео.'''
-        if viewed_time > self.lesson.duration:
-            raise ValidationError
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -50,7 +45,6 @@ class LessonProgress(models.Model):
         verbose_name='Урок'
     )
     viewed_time = models.DurationField(
-        validators=[viewed_time_validator],
         default=None,
         verbose_name='Просмотренное время'
     )
@@ -67,6 +61,11 @@ class LessonProgress(models.Model):
         return 'Не просмотрено'
     
     status.fget.short_description = 'Статус'
+
+    def save(self, *args, **kwargs):
+        if self.viewed_time > self.lesson.duration:
+            self.viewed_time = self.lesson.duration
+        super().save(self, *args, **kwargs)
 
     def __str__(self) -> str:
         '''Возвращает id прогресса урока.'''
