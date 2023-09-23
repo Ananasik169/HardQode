@@ -1,7 +1,11 @@
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.serializers import ModelSerializer
 from collections import OrderedDict
-from products.models import Lesson, Product
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum
+from rest_framework.serializers import ModelSerializer
+from products.models import Lesson, Product, LessonProgress, ProductAccess
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class BaseLessonSerializer(ModelSerializer):
@@ -16,6 +20,7 @@ class BaseLessonSerializer(ModelSerializer):
     def to_representation(self, instance: Lesson) -> OrderedDict:
         '''Добавляет в данные API дополнительные поля.'''
         data = super().to_representation(instance)
+
         try:
             lesson_progress = instance.lesson_progress.get(user=self.context['request'].user)
         except ObjectDoesNotExist:
@@ -27,12 +32,35 @@ class BaseLessonSerializer(ModelSerializer):
 
 class RetriveLessonSerializer(BaseLessonSerializer):
     '''Сериализатор API уроков одного продукта.'''
-    custom_fields = custom_fields = ['viewed_time', 'status', 'last_view']
+    custom_fields = ['viewed_time', 'status', 'last_view']
 
 
-class StatisticsSerializer(ModelSerializer):
+class ProductSerializer(ModelSerializer):
     '''Сериализатор API статистики.'''
 
     class Meta:
+        '''Метаданные.'''
         model = Product
         fields = "__all__"
+
+    def to_representation(self, instance: Product) -> OrderedDict:
+        '''Добавляет в данные API дополнительные поля.'''
+        data = super().to_representation(instance)
+
+        lessons_views = LessonProgress.objects.filter(
+            lesson__in=instance.lessons.all()
+        ).count()
+        total_viewed_time = LessonProgress.objects.filter(
+            lesson__in=instance.lessons.all()
+        ).aggregate(Sum('viewed_time'))
+        product_users = User.objects.filter(
+            access__product=instance
+        ).distinct().count()
+
+        access_percent = round((product_users / User.objects.all().count()) * 100, 2)
+        data.update({
+            'lessons_views': lessons_views, 
+            'product_users': product_users, 
+            'access_percent': access_percent
+            } | total_viewed_time)
+        return data
