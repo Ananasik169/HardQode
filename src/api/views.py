@@ -18,6 +18,7 @@ from api.serializers import (
 )
 
 class LessonViewSet(viewsets.ViewSet):
+    '''Класс отображения уроков.'''
    
     def list(self, request: Request) -> Response:
         '''Возвращает данные о всех уроках, доступных пользователю.'''
@@ -37,7 +38,8 @@ class LessonViewSet(viewsets.ViewSet):
 
 
 class ProductViewSet(viewsets.ViewSet):
-    
+    '''Класс отображения продуктов.'''
+
     def list(self, request: Request) -> Response:
         '''Возвращает статистику по всем продуктам.'''
         queryset = Product.objects.all()

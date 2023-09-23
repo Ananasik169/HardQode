@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Sum
+from django.db.models import Sum, IntegerField
 from rest_framework.serializers import ModelSerializer
-from products.models import Lesson, Product, LessonProgress, ProductAccess
+from products.models import Lesson, Product, LessonProgress
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -52,7 +52,7 @@ class ProductSerializer(ModelSerializer):
         ).count()
         total_viewed_time = LessonProgress.objects.filter(
             lesson__in=instance.lessons.all()
-        ).aggregate(Sum('viewed_time'))
+        ).aggregate(total_viewed_time=Sum('viewed_time', output_field=IntegerField())/10**6)
         product_users = User.objects.filter(
             access__product=instance
         ).distinct().count()
