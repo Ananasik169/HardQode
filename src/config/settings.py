@@ -9,23 +9,27 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
+
+from dotenv import dotenv_values
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+config = dotenv_values(os.environ.get("env_file", ".env.dev"))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c0wsq55ce(sl2=5td0f+w(#=lqum$-zz1%8k3j#)yi_!l69#xh'
+
+SECRET_KEY = config.get("secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(config.get("debug"))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config.get("allowed_hosts").split()
 
 
 # Application definition
@@ -98,12 +102,15 @@ SWAGGER_SETTINGS = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config.get("db_name"),
+        "USER": config.get("db_user"),
+        "PASSWORD": config.get("db_password"),
+        "HOST": config.get("db_host"),
+        "PORT": config.get("db_port"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

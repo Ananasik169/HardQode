@@ -1,4 +1,6 @@
 venv
+.env.dev
+.env.prod
 
 src/db.sqlite3
 
