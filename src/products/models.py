@@ -42,6 +42,7 @@ class LessonProgress(models.Model):
     lesson = models.ForeignKey(
         'Lesson',
         on_delete=models.CASCADE,
+        related_name='lesson_progress',
         verbose_name='Урок'
     )
     viewed_time = models.DurationField(
@@ -73,6 +74,7 @@ class LessonProgress(models.Model):
     
     class Meta:
         '''Метаданные.'''
+        unique_together = ('user', 'lesson')
         verbose_name = 'Прогресс урока'
         verbose_name_plural = 'Прогрессы уроков'
 
