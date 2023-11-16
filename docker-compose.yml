@@ -1,4 +1,4 @@
-versio: 3.8
+version: "3.8"
 services:
   postgres:
     image: postgres:15.0-alpine
@@ -12,13 +12,24 @@ services:
       - POSTGRES_DB=hard-qode
   backend:
     build: ./src
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn --workers=4 --bind 0.0.0.0:8000 server.wsgi:application"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn --workers=4 --bind 0.0.0.0:8000 config.wsgi:application"
     ports:
       - "8000:8000"
     depends_on:
       - postgres
+    volumes:
+      - static_data:/usr/hard-qode/src/static
     env_file:
-      - ./src/.env.dev
+      - ./src/.env.prod
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - static_data:/usr/hard-qode/src/static
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
+  static_data:

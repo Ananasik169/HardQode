@@ -16,7 +16,7 @@ from dotenv import dotenv_values
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-config = dotenv_values(os.environ.get("env_file", ".env.dev"))
+config = os.environ
 
 
 # Quick-start development settings - unsuitable for production
@@ -104,7 +104,7 @@ SWAGGER_SETTINGS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config.get("db_name"),
+        "NAME": config.get("db_name", ),
         "USER": config.get("db_user"),
         "PASSWORD": config.get("db_password"),
         "HOST": config.get("db_host"),
@@ -147,6 +147,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
